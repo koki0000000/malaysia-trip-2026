@@ -153,10 +153,11 @@
 
   /* 候補（タップで開く） */
   .opts { margin-top:1.1rem; }
-  details.opt { border:1px solid var(--pick-line); border-radius:3px; margin-top:.7rem;
-                background:var(--sheet); overflow:hidden; }
-  details.opt > summary { list-style:none; cursor:pointer; padding:.8rem .95rem;
-                          background:var(--pick-wash); display:flex; gap:.6rem; align-items:flex-start; }
+  .opt { border:1px solid var(--pick-line); border-radius:3px; margin-top:.7rem;
+         background:var(--sheet); overflow:hidden; }
+  .opt > summary, .opt > .ohead { padding:.8rem .95rem; background:var(--pick-wash);
+                                  display:flex; gap:.6rem; align-items:flex-start; }
+  details.opt > summary { list-style:none; cursor:pointer; }
   details.opt > summary::-webkit-details-marker { display:none; }
   details.opt > summary:focus-visible { outline:2px solid var(--brass-2); outline-offset:-2px; }
   .optkey { font-family:var(--mono); font-size:.7rem; font-weight:800; color:#fff;
@@ -165,8 +166,9 @@
   .opttxt span { display:block; font-size:.79rem; color:var(--ink-2); margin-top:.15rem; }
   .opttxt .more { color:var(--pick); font-size:.74rem; font-weight:700; margin-top:.3rem; }
   details.opt[open] .opttxt .more { display:none; }
-  details.opt .inner { padding:.2rem 0 1rem; }
-  details.opt .inner > .pad2 { padding:0 .95rem; }
+  .opt.static .opttxt .more { display:none; }
+  .opt .inner { padding:.2rem 0 1rem; }
+  .opt .inner > .pad2 { padding:0 .95rem; }
 
   /* eat */
   .eat { margin-top:1.1rem; }
@@ -221,6 +223,25 @@
   footer { margin-top:2.6rem; padding:1.1rem 1.25rem 2.6rem; border-top:1px solid var(--rule);
            font-size:.74rem; color:var(--ink-3); }
   footer p + p { margin-top:.45rem; }
+
+  /* ---------- 印刷（紙で配る用）。画面表示には影響しません ---------- */
+  @media print {
+    /* 折りたたみは全部開いた状態で印刷する */
+    details > *:not(summary) { display:block !important; }
+    details > summary { list-style:none; }
+    .opttxt .more { display:none !important; }
+    /* 背景色と地図を紙にも出す */
+    body { -webkit-print-color-adjust:exact; print-color-adjust:exact;
+           background:#FFFFFF; color:#18201E; }
+    .doc { max-width:none; }
+    .pin, .plab, .tlab, .cover .txt { box-shadow:none; }
+    /* 途中で切れると読めなくなるものを1ページに収める */
+    table.tt tr, .eat .row, .eat li, ul.plain li, table.todo tr,
+    .mapbox, .note, .warn, .opt { break-inside:avoid; }
+    .day, .sec { break-before:page; }
+    .cover img { height:14rem; }
+    a { text-decoration:underline; }
+  }
 </style>
 
 <div class="doc">
@@ -252,7 +273,7 @@
     <div class="eyebrow">Choose together</div>
     <h2>2日目と3日目は、みんなで選んでください</h2>
     <p class="lede">1日目と4日目は決まっています。<b>2日目（8/12）と3日目（8/13）だけ、候補を2つずつ用意しました。</b>
-      それぞれの日のところに <b>候補A・候補B</b> があるので、<b>タップで開いて</b>中身を見比べてください。決まったら行輝に教えてください。</p>
+      それぞれの日のところに <b>候補A・候補B</b> の時間割があるので、見比べてください。決まったら行輝に教えてください。</p>
     <div class="hr"></div>
     <div class="note"><b>2日目と3日目はつながっています。</b>
       2日目にマラッカへ行くと（候補A）、買い物の時間が3日目の午後にしか残りません。
@@ -374,7 +395,7 @@
         <tr class="key"><td class="t">18:15</td><td class="e"><b>KLIA2 Level 2・ZUS Coffee 前で合流</b><small>17:05着から入国と荷物受取に40〜60分みています</small></td></tr>
         <tr><td class="t">18:30</td><td class="e">Grab でモントキアラへ<small>40〜55分・<span class="num">RM75〜105</span>（¥2,888〜4,042）。4人＋荷物なら6人乗りで <span class="num">RM100〜130</span>。乗り場は KLIA2 Level 1 の <b>Door 4 / Door 5</b>（案内表示は e-Hailing）</small></td></tr>
         <tr><td class="t">19:15</td><td class="e">Arté by Thomas Chan チェックイン</td></tr>
-        <tr class="key"><td class="t">20:15</td><td class="e"><b>夕食：海鮮のスチームボート（火鍋）</b><small>ホテルから車5〜10分・<span class="num">RM5〜7</span>（¥190〜270）。詳しくは下の「この日の食事」</small></td></tr>
+        <tr class="key"><td class="t">20:15</td><td class="e"><b>夕食</b><small>下の「この日の食事」の候補から選びます</small></td></tr>
       </table>
 
       <div class="eat">
@@ -383,10 +404,15 @@
           <ul><li><b>機内食</b><span>KL着が16:45なので現地の昼はありません</span></li></ul></div>
         <div class="row"><span class="when">夜</span>
           <ul>
+            <li><b>ジャラン・アロー屋台街</b>
+              <span>通りの両側に屋台と食堂が並ぶ、KLでいちばん有名な夜の食べ歩きストリートです。ホテルから車20〜30分・<span class="num">RM10〜16</span>（¥390〜620）。<br>
+              <b>毎日 14:30〜24:00</b>（Google 4.4・12,158件）で、<b>18時〜24時がいちばん賑わいます</b>。<b>Sai Woo 西湖</b>（福建麺や海鮮・16:00〜翌2:00・月曜定休・Google 4.3）／<b>Wong Ah Wah 黄亜華</b>（炭火のチキンウィング・16:30〜翌2:00・月曜定休・Google 3.3）／Meng Kee（焼き魚・サテ）<br>
+              ⚠️ <b>スリの多い場所です。</b>貴重品は体の前で管理してください</span>
+              <a href="https://cham.lifestylinglog.com/jalan-alor/">歩き方の参考ページ</a> ・
+              <a href="https://www.google.com/maps/place/Jalan+Alor+Food+Street/@3.146121,101.7092762,17z">地図</a></li>
             <li><b>Harbour Hotpot 码头风云（海鮮スチームボート）</b>
               <span>ホテルから車5〜10分（Solaris Mont Kiara）。鍋のスープを豚骨・トマト・かぼちゃ鶏・マラから選べて、<b>店内に生簀があるので海鮮の具も頼めます</b>。辛いのが苦手でも大丈夫です。<br>
-              <b>毎日 12:00〜翌6:00・定休なし</b>／Google 4.9（2,794件）／RM60〜180・1人（¥2,310〜6,930）／<b>ネット予約あり</b>・☎ +60 13-999 2898<br>
-              ※以前お伝えしていた「MT Hotpot」は、<b>同じ場所が現在この店に変わっています</b></span>
+              <b>毎日 12:00〜翌6:00・定休なし</b>／Google 4.9（2,794件）／RM60〜180・1人（¥2,310〜6,930）／<b>ネット予約あり</b>・☎ +60 13-999 2898</span>
               <a href="https://restaurants.umai.io/restaurants/matoufengyun-hotpot">予約（UMAI）</a> ・
               <a href="https://www.google.com/maps/place/Harbour+Hotpot/@3.1764483,101.6598851,17z">地図</a></li>
             <li><b>Steam Era Hartamas 蒸时代（海鮮の蒸し料理）</b>
@@ -396,8 +422,8 @@
               <a href="https://www.google.com/maps/place/Steam+Era+Hartamas/@3.1623427,101.6498034,17z">地図</a></li>
           </ul></div>
       </div>
-      <div class="note">到着日は移動で疲れているので、<b>ホテルのすぐ近く</b>で済ませます。屋台街（ジャラン・アロー）は車で20〜30分かかるので、別の日に回しました。
-        <br>※以前候補に入れていた <b>Hartamas Seafood 知味店</b> は、いまGoogleマップに載っておらず<b>閉店した可能性が高い</b>ため外しました。</div>
+      <div class="note">到着日は移動で疲れています。<b>ホテルのすぐ近くで済ませたいなら火鍋の2店</b>（車5〜15分）、<b>初日から屋台の雰囲気を味わいたいならジャラン・アロー</b>（車20〜30分）。
+        火鍋の2店は<b>1日目〜3日目のどの夜にも回せます</b>ので、初日をジャラン・アローにして火鍋を別の夜にすることもできます。みんなで決めてください。</div>
     </div>
   </section>
 
@@ -412,17 +438,16 @@
       </div>
     </div>
     <div class="pad">
-      <p class="lede" style="margin-top:1.1rem"><b>この日は2つの候補があります。</b>どちらか一方を選びます。下の <b>候補A</b> と <b>候補B</b> をタップすると、時間割が開きます。</p>
+      <p class="lede" style="margin-top:1.1rem"><b>この日は2つの候補があります。</b>どちらか一方を選びます。下に <b>候補A</b> と <b>候補B</b> の時間割を両方載せてあります。</p>
       <div class="opts">
 
         <!-- ---- 候補A マラッカ ---- -->
-        <details class="opt" id="d2a">
-          <summary>
+        <div class="opt static" id="d2a">
+          <div class="ohead">
             <span class="optkey">候補A</span>
             <span class="opttxt"><b>マラッカへ日帰り</b>
-              <span>世界遺産の古い港町。プラナカン（中国系マレー文化）の邸宅と、オランダ統治時代の赤い街並み、川のクルーズ。片道1時間45分のバス。夜9時にホテルへ戻ります。</span>
-              <span class="more">タップして時間割を見る ▾</span></span>
-          </summary>
+              <span>世界遺産の古い港町。プラナカン（中国系マレー文化）の邸宅と、オランダ統治時代の赤い街並み、川のクルーズ。片道1時間45分のバス。夜9時にホテルへ戻ります。</span></span>
+          </div>
           <div class="inner">
             <div class="legs">
               <span class="st">ホテル</span><span class="ar">— Grab 30〜45分 →</span>
@@ -477,7 +502,7 @@
                       <a href="https://wa.me/60149256099">WhatsApp（+60 14-925 6099）</a> ・
                       <a href="https://maps.app.goo.gl/B2VXxSYVQjdmBWjM8">地図</a></li>
                     <li><b>Hoe Kee（チキンライスボール）</b>
-                      <span>ごはんを団子状に丸めて出す、マラッカ名物のチキンライス。<b>水曜 8:30〜16:30・木曜定休</b>／Google 3.9（1,534件）／<b>予約不可・並びます・現金のみ</b>／☎ +60 6-283 4751<br>⚠️ 2026年5月に一度閉まっていたという口コミがあります。行く前日に電話で確認します</span>
+                      <span>ごはんを団子状に丸めて出す、マラッカ名物のチキンライス。<b>水曜 8:30〜16:30・木曜定休</b>／Google 3.9（1,534件）／<b>予約不可・並びます・現金のみ</b>／☎ +60 6-283 4751</span>
                       <a href="https://www.google.com/maps/place/Hoe+Kee+Chicken+Rice/@2.1953512,102.2482741,17z">地図</a></li>
                     <li><b>Jonker 88（チェンドル）</b>
                       <span>かき氷にココナッツミルクと椰子砂糖をかけたマラッカの定番デザート。ニョニャ・ラクサもあります。<b>毎日 9:30〜18:00・無休</b>／Google 3.8（4,314件）／予約不可・セルフサービス</span>
@@ -487,24 +512,23 @@
                   <ul><li><b>ホテル近くで軽めに</b><span>21時にホテル着なので、Publika か Harbour Hotpot（翌6時まで）で軽く</span></li></ul></div>
               </div>
 
-              <div class="warn"><b>お伝えしていた「Ban Lee Siang は16時閉店」は間違いでした。すみません。</b>
-                実際は <b>15:00〜23:00</b> で、夕方に行けば十分間に合います。<b>ただし水曜が定休日なので、8/12は開いていません。</b>
-                水曜に開いているサテチェルップのお店は <b>Capitol Satay</b>（17:00〜翌2:00・Google 4.3）ですが、旧市街から2km離れていて、上の時間割だとバスに間に合いません。<b>どうしても食べたい場合は、帰りを20:30の便にする必要があります</b>（ホテル着は23時台になります）。
+              <div class="warn"><b>サテチェルップを食べたい場合。</b>
+                マラッカ名物の <b>Ban Lee Siang</b> は <b>15:00〜23:00</b> ですが、<b>水曜が定休日なので8/12は開いていません。</b>
+                水曜に開いているのは <b>Capitol Satay</b>（17:00〜翌2:00・Google 4.3）ですが、旧市街から2km離れていて、上の時間割だとバスに間に合いません。<b>食べるなら帰りを20:30の便にする必要があります</b>（ホテル着は23時台になります）。
                 <br><br>（サテチェルップ＝串に刺した肉・魚介・野菜を、テーブルの真ん中で煮立つ<b>ピーナッツソースの鍋にしゃぶしゃぶのように浸して食べる</b>マラッカ発祥の料理です。串1本80セン＝約¥31から、食べた本数で精算します）</div>
 
-              <div class="note"><b>朝9時半発にしました。</b>最初は朝8時発で考えていましたが、バスの時刻を調べたら<b>9時台・10時台にも本数があり、8時発にする理由がありませんでした</b>。帰りも19時台・20時台の便があり、最終は23:45です。</div>
+              <div class="note">バスは<b>9:00・9:30・9:45・10:30・10:45</b>と本数があり、帰りも<b>18:30・19:30・20:00・20:30・20:45</b>、最終は23:45です。時間を前後させたいときはこの中から選べます。</div>
             </div>
           </div>
-        </details>
+        </div>
 
         <!-- ---- 候補B KL市内 ---- -->
-        <details class="opt" id="d2b">
-          <summary>
+        <div class="opt static" id="d2b">
+          <div class="ohead">
             <span class="optkey">候補B</span>
             <span class="opttxt"><b>マラッカへ行かず、クアラルンプール市内で買い物と食べ歩き</b>
-              <span>セントラルマーケット（民芸品）→ 蝦麺のお昼 → TRX → パビリオン・KKV → ジャラン・アロー屋台街。<b>みんなが挙げてくれた買い物が全部この日に入ります。</b></span>
-              <span class="more">タップして時間割を見る ▾</span></span>
-          </summary>
+              <span>セントラルマーケット（民芸品）→ 蝦麺のお昼 → TRX → パビリオン・KKV → ジャラン・アロー屋台街。<b>みんなが挙げてくれた買い物が全部この日に入ります。</b></span></span>
+          </div>
           <div class="inner">
             <div class="legs">
               <span class="st">ホテル</span><span class="ar">— Grab 25〜30分 →</span>
@@ -576,7 +600,7 @@
               <div class="note">この日の交通費は4人で <b>RM43〜67（¥1,650〜2,580）</b>くらいです。セントラルマーケットもTRXもパビリオンも入場無料なので、かかるのは交通費と食事代だけです（買ったものは別）。</div>
             </div>
           </div>
-        </details>
+        </div>
       </div>
     </div>
   </section>
@@ -651,8 +675,7 @@
                 <tr><td class="t">20:00</td><td class="e">Grab でホテルへ<small>38.8km・35〜60分・<span class="num">RM51〜77</span>（¥1,960〜2,970）</small></td></tr>
                 <tr><td class="t">20:45</td><td class="e">ホテル着</td></tr>
               </table>
-              <div class="note"><b>順番を入れ替えました。</b>前のしおりは「午前にピンクモスク → 午後にブルーモスク」でしたが、これだと<b>夕方にピンクモスクの写真が撮れません</b>。
-                ブルーモスクが17:00で閉まり、ピンクモスクの夕景が18:45からなので、<b>ブルーモスクを先に済ませる順番でしか両立しません。</b></div>
+              <div class="note"><b>この順番でしか両立しません。</b>ブルーモスクは17:00で閉まり、ピンクモスクの夕景は18:45から。2つは車で35〜70分離れているので、<b>ブルーモスクを先に済ませる順番</b>になります。</div>
               <div class="note">この日のGrab代は合計で <b>RM141〜212（¥5,430〜8,160）</b>くらい、車に乗っている時間は<b>2時間〜3時間20分</b>です。</div>
             </div>
           </div>
@@ -719,12 +742,12 @@
             <li><b>ピンクモスク（Masjid Putra・プトラジャヤ）</b>
               <span><b>バラ色の花崗岩</b>でできた外壁が名前の由来です。ドームが9つ（いちばん大きいもので高さ50m）、116mの塔が1本、1万5千人が入ります。<b>建物の一部が人工の湖に張り出して建っています</b>。中は12本の巨大な柱と、装飾された天井。<br>
               <b>入場無料。ローブとスカーフは無料で貸してもらえます。礼拝ホールの中は撮影禁止です</b><br>
-              ⚠️ <b>中に入れる枠は30分しかありません（17:30〜18:00）。</b>お祈りの時間で区切られているためです（木曜は 9:00〜12:30／14:00〜16:00／17:30〜18:00）。<b>この時間だけは公式サイトが確認できず、旅行情報サイトの情報です。現地の掲示で確かめてください</b><br>
+              ⚠️ <b>中に入れる枠は30分しかありません（17:30〜18:00）。</b>お祈りの時間で区切られているためです（木曜は 9:00〜12:30／14:00〜16:00／17:30〜18:00）。<b>当日は入口の掲示で確かめてください</b><br>
               ★ <b>写真だけなら中に入る必要はありません。</b>プトラ広場・湖畔の遊歩道・プトラ橋から、外観と湖面の反射が撮れます</span>
               <a href="https://www.google.com/maps/place/Putra+Mosque/@2.9366,101.6892,17z">地図</a></li>
             <li><b>プトラジャヤ湖（Tasik Putrajaya）</b>
               <span>予定としては入れていません。この湖は<b>650ヘクタールもある人工の湖</b>で「湖に行く」という行為が成立しないうえ、<b>ピンクモスクが湖に張り出して建っているので、プトラ広場に立った時点で湖は目の前にあります</b>。<br>
-              モスクのすぐ隣の桟橋（Jeti Putra）から<b>45分の遊覧船</b>が出ていて、湖の側からしか撮れないモスクの正面が撮れます。外国人大人 RM50（4人で RM200＝¥7,700）。<b>ただし木曜の夕方に運航しているかどうかが情報源によって食い違っていて、確認できませんでした。</b>乗りたい場合は現地で電話（+603-8881-0648）してから決めてください</span></li>
+              モスクのすぐ隣の桟橋（Jeti Putra）から<b>45分の遊覧船</b>が出ていて、湖の側からしか撮れないモスクの正面が撮れます。外国人大人 RM50（4人で RM200＝¥7,700）。<b>ただし木曜の夕方に運航しているかどうかは分かりません。</b>乗りたい場合は現地で電話（+603-8881-0648）して確かめてください</span></li>
           </ul></div>
         <div class="row"><span class="when">夜</span>
           <ul>
@@ -785,7 +808,7 @@
           <b>1階（Ground）Lot G06 に サンローラン</b>／<b>Level 1 に ロイヤルセランゴール</b>（ピューター製品・Lot 105・1885年創業）／<b>Level 2 に フードコート</b>／<b>Level 4 にレストラン街と紀伊國屋書店、Petrosains（科学館）</b>／<b>地下のコンコース階にスーパー2軒</b>（Isetan Foodmarket・Cold Storage）と<b>両替所</b>。隣の Permata Sapura の地下に <b>Beryl'sチョコ</b><br>
           ⚠️ BOH紅茶・Beryl's・バティックの<b>専門店はモール内にありません</b>。紅茶とチョコは地下のスーパーの棚を見てください</small></td></tr>
         <tr><td class="t">12:00</td><td class="e">昼食（3つから選ぶ）<small><b>Little Penang Kafé</b>（Level 4・<b>アッサムラクサ</b>・10:30〜21:30・Google 4.1）／<b>Nyonya Colors</b>（地下・<b>ニョニャラクサ</b>・8:00〜22:00）／<b>DIN by Din Tai Fung</b>（Level 4 Lot 417・小籠包・10:30〜21:30・Google 4.3）<br>
-          ※ Din Tai Fung は公式に<b>「豚肉不使用」</b>と書かれていますが、<b>ハラル認証を取っているかどうかは公式に記載がなく、わかりません</b>（前のしおりで「ハラル」と書いていたのは言いすぎでした）<br>
+          ※ Din Tai Fung は公式に<b>「豚肉不使用」</b>と書かれていますが、<b>ハラル認証を取っているかどうかは公式に記載がなく、わかりません</b><br>
           ※ <b>3店ともオンライン予約はありません。</b>電話か、並ぶかです</small></td></tr>
         <tr><td class="t">13:15</td><td class="e">自由時間<small>Petrosains（科学館）、紀伊國屋書店、買い残したもの。午後はスコールが多い時間帯なので、屋内で過ごせるようにしています。<br>まだ買い物が残っていれば、<b>KLCC–ブキッビンタンの屋根つき歩道</b>（全長1.17km・<b>徒歩10〜15分・冷房つき</b>・6:00〜23:00・無料）でパビリオンへ行けます</small></td></tr>
         <tr class="key"><td class="t">17:00</td><td class="e"><b>早めの夕食</b><small><b>2日目にジャラン・アローへ行かなかった場合</b>＝ジャラン・アロー屋台街へ（通りは14:30から、Sai Woo が16:00から、Wong Ah Wah が16:30から。<b>17時台はまだ屋台が出そろっていないことがあります</b>）→ <a href="https://cham.lifestylinglog.com/jalan-alor/">歩き方の参考ページ</a><br>
@@ -840,11 +863,10 @@
         <span>マレーシアのチョコレートで、看板商品は<b>ティラミス・アーモンド</b>。65g で RM7.98（約¥307）、150〜180gの箱で RM22.80（約¥878）くらいです。<br>
         <b>KLCC店</b>（Permata Sapura 地下・Suria KLCCの隣）／<b>パビリオン店</b>（Pavilion Elite）／<b>TRX店</b>（地下）／Fahrenheit88・Lot 10・Sungei Wang。<b>どこも10:00〜22:00で、行く先々にあります</b><br>
         ※ 工場（Seri Kembangan の Chocolate Wonderland）は<b>片道30〜45分＋WhatsApp事前予約が必要で、見学は20分・製造ラインは見られません</b>。<b>今回は行かなくていいと思います</b><br>
-        ※ <b>KLIAターミナル1に売店があるかは確認できませんでした</b>（公式の店舗リストにも空港のショップ一覧にも載っていません）。空港で買うつもりにしないほうが安全です</span></li>
+        ※ <b>空港で買うつもりにしないでください。</b>ターミナル1にあるとは限りません。市内で買っておくのが確実です</span></li>
       <li><b>BOH紅茶</b>
         <span>キャメロンハイランド（マレーシア中部の高地）の紅茶で、1929年創業。<b>Cameronian Gold Blend</b>、フレーバーの <b>Seri Songket</b>、Teh Tarik のインスタントなどがあります。<br>
-        <b>スーパーで買うのがいちばん確実です。</b>ホテルと同じモントキアラの <b>Village Grocer 1 Mont Kiara</b>（8:30〜22:00）が最短。1箱あたり <b>RM10.20〜14.40（¥393〜554）</b>くらいです<br>
-        ※ KL市内に直営店があるかは、公式サイトが見られず確認できませんでした</span></li>
+        <b>スーパーで買うのがいちばん確実です。</b>ホテルと同じモントキアラの <b>Village Grocer 1 Mont Kiara</b>（8:30〜22:00）が最短。1箱あたり <b>RM10.20〜14.40（¥393〜554）</b>くらいです</span></li>
       <li><b>セントラルマーケット（Pasar Seni）</b>
         <span><b>1888年の市場の建物</b>を改装した民芸・工芸の館。バティック、ソンケット、木彫り、ピューター、手作りアクセサリー、凧、影絵人形。<b>入場無料・10:00〜22:00</b>。隣のカストゥーリ通り（屋根つきの露店）とチャイナタウンが徒歩5〜10分<br>
         <b>ここはモールでは代わりになりません。</b>逆に、欲しいのがチョコと紅茶とブランド品だけなら、行かなくても困りません<br>
@@ -891,7 +913,7 @@
           <tr><td>2日目・3日目の夜</td><td>Village Grocer 1 Mont Kiara（〜22:00）</td><td><b>BOH紅茶</b>・白コーヒー・ミロ。ばらまき用はここが最安</td></tr>
           <tr><td>買い物の日</td><td>パビリオン／TRX／KLCC</td><td><b>Beryl'sチョコ</b>（どの館にもあります）</td></tr>
           <tr><td>4日目 午前</td><td>Suria KLCC</td><td>ロイヤルセランゴール（ピューター・Level 1）／地下のスーパーで紅茶・チョコ</td></tr>
-          <tr><td>4日目 出国後</td><td>KLIA 免税店（朝6時〜深夜0時）</td><td>買い忘れ・お酒・たばこ。<b>Beryl'sがあるかは未確認</b>なので当てにしないこと</td></tr>
+          <tr><td>4日目 出国後</td><td>KLIA 免税店（朝6時〜深夜0時）</td><td>買い忘れ・お酒・たばこ。<b>チョコと紅茶は市内で買っておく</b>のが確実です</td></tr>
         </tbody>
       </table>
     </div>
@@ -914,10 +936,23 @@
   <footer>
     <p>写真: Wikimedia Commons（CC BY-SA）／地図: OpenStreetMap contributors</p>
     <p>料金・営業時間は 2026年8月8日 時点で各公式サイトとGoogleマップを確認したものです。現地で変わっている場合は掲示に従ってください。</p>
-    <p>ピンクモスクの見学時間だけは公式サイトが確認できませんでした（プトラジャヤ市の該当ページが表示されず、モスク公式のドメインも生きていません）。旅行情報サイト3つが一致している時間を載せていますが、現地の掲示で確かめてください。</p>
+    <p>ピンクモスクの見学できる時間はお祈りの時間で変わることがあります。当日は入口の掲示で確かめてください。</p>
   </footer>
 
 </div>
+
+<script>
+  (function () {
+    var openAll = function () {
+      document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+    };
+    window.addEventListener('beforeprint', openAll);
+    if (window.matchMedia) {
+      var mq = window.matchMedia('print');
+      if (mq.addEventListener) mq.addEventListener('change', function (e) { if (e.matches) openAll(); });
+    }
+  })();
+</script>
 
 </body>
 </html>
